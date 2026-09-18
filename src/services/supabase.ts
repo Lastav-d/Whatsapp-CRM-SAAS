@@ -10,13 +10,13 @@ import {
 } from '../types';
 import { resolvePinCode, estimateDistanceKm, calculateLeadScore } from '../utils/pinResolver';
 
-export const SUPABASE_URL = 'https://njmzdeddmangggeukjce.supabase.co';
-export const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbXpkZWRkbWFuZ2dnZXVramNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NTg0MjEsImV4cCI6MjA4OTAzNDQyMX0.R45tYjBfxVw8vQf2Qk_W2y6Xy9hF1_Z4sA1W5k7b8zM';
+export const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://njmzdeddmangggeukjce.supabase.co';
+export const SUPABASE_KEY = (import.meta as any).env?.VITE_SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qbXpkZWRkbWFuZ2dnZXVramNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4NTE0ODIsImV4cCI6MjEwMTQyNzQ4Mn0.uXZ8traER2l4mO86fRsBia9IVe-UX86tTygHg_NXUCw';
 
 export const WHATSAPP_CONFIG = {
   phoneNumberId: '1240163099173755',
   displayPhoneNumber: '+91 99309 95959',
-  token: 'EAAM8c7oE44kBO8fM1YwNl1wM5J9z0c2x1q7r4s3t5u8v0w1x2y3z4a5b6c7d8e9f0',
+  token: 'EAAZAZB0gvhrGUBSDVyHhhTgWJYVAE0F8kTOSGAFLFyLtTwYGcgDczYSxySO2XlIZAAkXKYQP0mOqYKLpyZAE2Jn0pTWOfZAHNaS3Ki0Hq8QHfUi5af4C1RucZCiTmRaPohqvVy6jlfqkZBxCsHOBYCbUMlcLBqNIdB4DYFpCBH5BMXJbE0ydYJxw6Ht7oj0PiM8qAZDZD',
 };
 
 export const ACTIVE_CLIENT_PROFILE: ClientCompanyProfile = {
@@ -43,6 +43,7 @@ class SupabaseDataService {
         .order('updated_at', { ascending: false });
 
       if (error || !data) {
+        console.error('Supabase fetch bookings error:', error);
         return [];
       }
 
@@ -217,7 +218,7 @@ class SupabaseDataService {
         const company = data.company || '';
         const flowType = session.flow_type || (data.cargoType ? 'book' : 'general');
         
-        let lastMsg = 'WhatsApp Session Started';
+        let lastMsg = 'WhatsApp Session Active';
         if (session.state === 'cta_menu') {
           lastMsg = flowType === 'book' ? '✅ Booking request submitted' : '✅ Transporter registered';
         } else if (session.state) {
@@ -248,7 +249,7 @@ class SupabaseDataService {
           messages.push({
             id: `msg_${session.user_id}_3`,
             sender: 'bot',
-            text: `📍 Route: ${data.loadingPin || 'N/A'} ➔ ${data.unloadingPin || 'N/A'}\n🚛 Vehicle: ${data.vehicleType || 'Any'}\n📦 Cargo: ${data.material || 'General'}`,
+            text: `📍 Route: ${data.loadingPin || 'N/A'} ➔ ${data.unloadingPin || 'N/A'}\n🚛 Vehicle: ${data.vehicleType || 'Any'}\n📦 Cargo: ${data.material || 'General'}\n👤 Contact: ${data.contactName || 'Customer'} (${data.company || 'N/A'})`,
             timestamp: new Date(session.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             status: 'delivered',
           });
